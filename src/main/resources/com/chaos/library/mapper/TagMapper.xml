@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chaos.library.mapper.TagMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tag (name, created_at) VALUES (#{name}, NOW())
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM tag WHERE id = #{id}
+    </delete>
+
+    <select id="findById" resultType="com.chaos.library.entity.Tag">
+        SELECT * FROM tag WHERE id = #{id}
+    </select>
+
+    <select id="findAll" resultType="com.chaos.library.entity.Tag">
+        SELECT * FROM tag ORDER BY id DESC
+    </select>
+
+    <!-- 关联查询：通过中间表 book_tag 查 tag -->
+    <select id="findByBookId" resultType="com.chaos.library.entity.Tag">
+        SELECT t.* FROM tag t
+                            INNER JOIN book_tag bt ON t.id = bt.tag_id
+        WHERE bt.book_id = #{bookId}
+    </select>
+</mapper>

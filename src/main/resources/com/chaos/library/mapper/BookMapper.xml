@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chaos.library.mapper.BookMapper">
+
+    <!-- 插入图书 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO book
+        (title, author, description, isbn, publish_year, cover_url, total, stock, created_at, updated_at)
+        VALUES
+            (#{title}, #{author}, #{description}, #{isbn}, #{publishYear}, #{coverUrl}, #{total}, #{stock}, NOW(), NOW())
+    </insert>
+
+    <!-- 更新图书 -->
+    <update id="update">
+        UPDATE book
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="author != null">author = #{author},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="publishYear != null">publish_year = #{publishYear},</if>
+            <if test="coverUrl != null">cover_url = #{coverUrl},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新库存：使用 stock = stock + delta，乐观锁/原子更新 -->
+    <update id="updateStock">
+        UPDATE book
+        SET stock = stock + #{delta}, updated_at = NOW()
+        WHERE id = #{id}
+          AND (stock + #{delta}) >= 0
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM book WHERE id = #{id}
+    </delete>
+
+    <select id="findById" resultType="com.chaos.library.entity.Book">
+        SELECT * FROM book WHERE id = #{id}
+    </select>
+
+    <select id="findByIsbn" resultType="com.chaos.library.entity.Book">
+        SELECT * FROM book WHERE isbn = #{isbn} LIMIT 1
+    </select>
+
+    <!-- 维护中间表 -->
+    <insert id="insertBookTag">
+        INSERT INTO book_tag (book_id, tag_id, created_at) VALUES (#{bookId}, #{tagId}, NOW())
+    </insert>
+
+    <delete id="deleteBookTags">
+        DELETE FROM book_tag WHERE book_id = #{bookId}
+    </delete>
+
+    <!-- 动态查询条件片段 -->
+    <sql id="queryConditions">
+        <where>
+            <if test="query.title != null and query.title != ''">
+                AND b.title LIKE CONCAT('%', #{query.title}, '%')
+            </if>
+            <if test="query.author != null and query.author != ''">
+                AND b.author LIKE CONCAT('%', #{query.author}, '%')
+            </if>
+            <if test="query.isbn != null and query.isbn != ''">
+                AND b.isbn = #{query.isbn}
+            </if>
+            <!-- 标签筛选：如果是按标签名查，需要关联 -->
+            <if test="query.tagName != null and query.tagName != ''">
+                AND EXISTS (
+                SELECT 1 FROM book_tag bt
+                JOIN tag t ON bt.tag_id = t.id
+                WHERE bt.book_id = b.id AND t.name LIKE CONCAT('%', #{query.tagName}, '%')
+                )
+            </if>
+        </where>
+    </sql>
+
+    <!-- 分页查询列表 -->
+    <select id="selectList" resultType="com.chaos.library.entity.Book">
+        SELECT b.* FROM book b
+        <include refid="queryConditions"/>
+        ORDER BY b.created_at DESC
+        <if test="query.limit != null and query.offset != null">
+            LIMIT #{query.limit} OFFSET #{query.offset}
+        </if>
+    </select>
+
+    <!-- 统计总数 -->
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM book b
+        <include refid="queryConditions"/>
+    </select>
+
+</mapper>
