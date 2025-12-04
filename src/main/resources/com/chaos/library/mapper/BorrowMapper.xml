@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chaos.library.mapper.BorrowMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO borrow
+        (user_id, book_id, borrow_time, due_time, return_time, status, created_at, updated_at)
+        VALUES
+            (#{userId}, #{bookId}, #{borrowTime}, #{dueTime}, #{returnTime}, #{status}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE borrow
+        <set>
+            <if test="returnTime != null">return_time = #{returnTime},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="findById" resultType="com.chaos.library.entity.Borrow">
+        SELECT * FROM borrow WHERE id = #{id}
+    </select>
+
+    <select id="findByUserIdAndBookIdAndStatus" resultType="com.chaos.library.entity.Borrow">
+        SELECT * FROM borrow
+        WHERE user_id = #{userId} AND book_id = #{bookId} AND status = #{status}
+            LIMIT 1
+    </select>
+
+    <!-- 关联查询：带出书名和作者 -->
+    <select id="findListByUserId" resultType="com.chaos.library.entity.Borrow">
+        SELECT b.*, book.title as bookTitle, book.isbn as bookIsbn
+        FROM borrow b
+                 LEFT JOIN book ON b.book_id = book.id
+        WHERE b.user_id = #{userId}
+        ORDER BY b.created_at DESC
+    </select>
+
+    <select id="findAll" resultType="com.chaos.library.entity.Borrow">
+        SELECT b.*, book.title as bookTitle, u.name as userName
+        FROM borrow b
+                 LEFT JOIN book ON b.book_id = book.id
+                 LEFT JOIN `user` u ON b.user_id = u.id
+        ORDER BY b.created_at DESC
+    </select>
+
+</mapper>

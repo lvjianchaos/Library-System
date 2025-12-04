@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chaos.library.mapper.ReservationMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reservation (user_id, book_id, status, created_at)
+        VALUES (#{userId}, #{bookId}, #{status}, NOW())
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE reservation SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <!-- 查找最早的排队记录 (status=0) -->
+    <select id="findFirstPendingReservation" resultType="com.chaos.library.entity.Reservation">
+        SELECT * FROM reservation
+        WHERE book_id = #{bookId} AND status = 0
+        ORDER BY created_at ASC
+            LIMIT 1
+    </select>
+
+    <select id="findPendingByUserIdAndBookId" resultType="com.chaos.library.entity.Reservation">
+        SELECT * FROM reservation
+        WHERE user_id = #{userId} AND book_id = #{bookId} AND status = 0
+            LIMIT 1
+    </select>
+
+    <select id="findListByUserId" resultType="com.chaos.library.entity.Reservation">
+        SELECT r.*, b.title as bookTitle
+        FROM reservation r
+                 LEFT JOIN book b ON r.book_id = b.id
+        WHERE r.user_id = #{userId}
+        ORDER BY r.created_at DESC
+    </select>
+
+</mapper>
