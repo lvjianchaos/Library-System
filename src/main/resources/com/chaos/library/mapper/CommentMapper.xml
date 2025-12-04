@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chaos.library.mapper.CommentMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO comment (user_id, book_id, content, created_at)
+        VALUES (#{userId}, #{bookId}, #{content}, NOW())
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM comment WHERE id = #{id}
+    </delete>
+
+    <select id="findById" resultType="com.chaos.library.entity.Comment">
+        SELECT * FROM comment WHERE id = #{id}
+    </select>
+
+    <!-- 关联查询：带出评论人的姓名 -->
+    <select id="findByBookId" resultType="com.chaos.library.entity.Comment">
+        SELECT c.*, u.name as userName
+        FROM comment c
+                 LEFT JOIN `user` u ON c.user_id = u.id
+        WHERE c.book_id = #{bookId}
+        ORDER BY c.created_at DESC
+    </select>
+
+    <select id="findByUserId" resultType="com.chaos.library.entity.Comment">
+        SELECT c.*, b.title as bookTitle
+        FROM comment c
+                 LEFT JOIN book b ON c.book_id = b.id
+        WHERE c.user_id = #{userId}
+        ORDER BY c.created_at DESC
+    </select>
+
+</mapper>

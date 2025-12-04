@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chaos.library.mapper.FavoriteMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO favorite (user_id, book_id, created_at)
+        VALUES (#{userId}, #{bookId}, NOW())
+    </insert>
+
+    <delete id="deleteByUserIdAndBookId">
+        DELETE FROM favorite WHERE user_id = #{userId} AND book_id = #{bookId}
+    </delete>
+
+    <select id="findByUserIdAndBookId" resultType="com.chaos.library.entity.Favorite">
+        SELECT * FROM favorite
+        WHERE user_id = #{userId} AND book_id = #{bookId}
+        LIMIT 1
+    </select>
+
+    <select id="findListByUserId" resultType="com.chaos.library.entity.Favorite">
+        SELECT f.*, b.title as bookTitle, b.author as bookAuthor, b.cover_url as bookCoverUrl
+        FROM favorite f
+        LEFT JOIN book b ON f.book_id = b.id
+        WHERE f.user_id = #{userId}
+        ORDER BY f.created_at DESC
+    </select>
+
+</mapper>
