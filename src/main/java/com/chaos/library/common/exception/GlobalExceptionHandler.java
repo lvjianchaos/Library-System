@@ -3,6 +3,7 @@ package com.chaos.library.common.exception;
 import com.chaos.library.common.errorcode.BaseErrorCode;
 import com.chaos.library.common.result.Result;
 import com.chaos.library.common.result.Results;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -18,6 +19,7 @@ import java.util.Optional;
 /**
  * 全局异常处理器
  */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -74,7 +76,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public Result<Void> handleRuntimeException(RuntimeException ex) {
         // 在此处记录日志
-        // log.error("Internal Server Error: ", ex);
+        log.error("Internal Server Error: ", ex);
         return Results.failure(BaseErrorCode.SERVICE_ERROR.code(), BaseErrorCode.SERVICE_ERROR.message());
     }
 }

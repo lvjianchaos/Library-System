@@ -3,20 +3,20 @@
 <mapper namespace="com.chaos.library.mapper.UserMapper">
 
     <select id="findByUsername" resultType="com.chaos.library.entity.User">
-        SELECT * FROM user WHERE username = #{username}
+        SELECT * FROM `user` WHERE username = #{username}
     </select>
 
     <select id="findById" resultType="com.chaos.library.entity.User">
-        SELECT * FROM user WHERE id = #{id}
+        SELECT * FROM `user` WHERE id = #{id}
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO user (username, password, role, name, phone, created_at, updated_at)
+        INSERT INTO `user` (username, password, role, name, phone, created_at, updated_at)
         VALUES (#{username}, #{password}, #{role}, #{name}, #{phone}, NOW(), NOW())
     </insert>
 
     <update id="update">
-        UPDATE user
+        UPDATE `user`
         <set>
             <if test="password != null">password = #{password},</if>
             <if test="name != null">name = #{name},</if>

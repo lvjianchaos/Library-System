@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan("com.chaos.mapper")
+@MapperScan("com.chaos.library.mapper")
 public class LibraryApplication {
 
     public static void main(String[] args) {
