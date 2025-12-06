@@ -4,14 +4,13 @@ import com.chaos.library.common.errorcode.BaseErrorCode;
 import com.chaos.library.common.errorcode.UserErrorCode;
 import com.chaos.library.common.exception.ClientException;
 import com.chaos.library.common.util.JwtUtils;
-import com.chaos.library.dto.LoginRequest;
-import com.chaos.library.dto.LoginResponse;
-import com.chaos.library.dto.RegisterRequest;
+import com.chaos.library.dto.*;
 import com.chaos.library.entity.User;
 import com.chaos.library.mapper.UserMapper;
 import com.chaos.library.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,5 +86,35 @@ public class UserServiceImpl implements UserService {
             throw new ClientException(UserErrorCode.USER_NOT_FOUND);
         }
         return user;
+    }
+
+    @Override
+    public UserDto getUserProfile(Long userId) {
+        User user = getUserById(userId);
+        UserDto dto = new UserDto();
+        BeanUtils.copyProperties(user, dto);
+        return dto;
+    }
+
+    @Override
+    public void updateUserInfo(Long userId, UserUpdateInfoRequest request) {
+        User user = getUserById(userId);
+        user.setName(request.getName());
+        user.setPhone(request.getPhone());
+        userMapper.update(user);
+    }
+
+    @Override
+    public void updatePassword(Long userId, UserUpdatePasswordRequest request) {
+        User user = getUserById(userId);
+
+        // 1. 校验旧密码
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new ClientException(UserErrorCode.USER_PASSWORD_ERROR); // 使用密码错误的错误码
+        }
+
+        // 2. 更新新密码
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userMapper.update(user);
     }
 }

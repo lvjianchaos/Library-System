@@ -24,6 +24,6 @@ public class BookDto {
     private LocalDateTime updatedAt;
 
     private List<Tag> tags;
-    // 评论列表后续 Phase 5 再加
+    // 不再需要？
     // private List<CommentDto> comments;
 }
