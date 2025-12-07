@@ -1,5 +1,8 @@
 package com.chaos.library.mapper;
 
+import com.chaos.library.dto.ActivityDto;
+import com.chaos.library.dto.TopBookDto;
+import com.chaos.library.dto.TopUserDto;
 import com.chaos.library.entity.Borrow;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -31,4 +34,19 @@ public interface BorrowMapper {
      * 管理员查询所有借阅记录
      */
     List<Borrow> findAll();
+
+    /**
+     * 获取最近的借阅/归还动态
+     */
+    List<ActivityDto> findRecentActivities(@Param("limit") int limit);
+
+    /**
+     * 获取借阅次数最多的用户
+     */
+    List<TopUserDto> findTopUsers(@Param("limit") int limit);
+
+    /**
+     * 获取被借阅次数最多的图书
+     */
+    List<TopBookDto> findTopBooks(@Param("limit") int limit);
 }

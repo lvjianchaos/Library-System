@@ -46,4 +46,50 @@
         ORDER BY b.created_at DESC
     </select>
 
+    <!--
+       最近动态：
+       使用 UNION 连接两部分数据：
+       1. 所有的借阅操作 (取 borrow_time)
+       2. 所有的归还操作 (取 return_time，且 status=1)
+       最后按时间倒序
+    -->
+    <select id="findRecentActivities" resultType="com.chaos.library.dto.ActivityDto">
+        SELECT * FROM (
+                          (SELECT u.name as userName, b.title as bookTitle, '借阅' as action, br.borrow_time as time
+                           FROM borrow br
+                               JOIN `user` u ON br.user_id = u.id
+                               JOIN book b ON br.book_id = b.id
+                           ORDER BY br.borrow_time DESC LIMIT #{limit})
+                          UNION
+                          (SELECT u.name as userName, b.title as bookTitle, '归还' as action, br.return_time as time
+                           FROM borrow br
+                               JOIN `user` u ON br.user_id = u.id
+                               JOIN book b ON br.book_id = b.id
+                           WHERE br.status = 1
+                           ORDER BY br.return_time DESC LIMIT #{limit})
+                      ) as temp
+        ORDER BY time DESC
+            LIMIT #{limit}
+    </select>
+
+    <!-- 借阅达人：按 user_id 分组统计数量 -->
+    <select id="findTopUsers" resultType="com.chaos.library.dto.TopUserDto">
+        SELECT u.name as userName, COUNT(br.id) as borrowCount
+        FROM borrow br
+                 JOIN `user` u ON br.user_id = u.id
+        GROUP BY br.user_id
+        ORDER BY borrowCount DESC
+            LIMIT #{limit}
+    </select>
+
+    <!-- 热门图书：按 book_id 分组统计数量 -->
+    <select id="findTopBooks" resultType="com.chaos.library.dto.TopBookDto">
+        SELECT b.title as bookTitle, COUNT(br.id) as borrowCount
+        FROM borrow br
+                 JOIN book b ON br.book_id = b.id
+        GROUP BY br.book_id
+        ORDER BY borrowCount DESC
+            LIMIT #{limit}
+    </select>
+
 </mapper>
