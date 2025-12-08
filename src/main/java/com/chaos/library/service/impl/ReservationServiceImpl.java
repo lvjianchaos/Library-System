@@ -52,7 +52,6 @@ public class ReservationServiceImpl implements ReservationService {
     public void cancelReservation(Long userId, Long reservationId) {
         // 这里简单处理：不做查询校验，直接根据 ID 和 UserId 尝试更新
         // 但严谨的做法是先查出来判断状态
-        // 这里我们假设 Mapper 没有提供直接根据 ID+UserID 更新的方法，所以先做逻辑层校验
 
         // 实际上 Mapper 只有 updateStatus(id, status)，这可能导致用户取消别人的预约
         // 这是一个潜在的安全隐患，虽然 ID 很难猜。
