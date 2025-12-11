@@ -11,12 +11,6 @@ spring:
     username: root
     password: Lv050611_
 
-mybatis:
-  mapper-locations: classpath:mapper/*.xml
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
 logging:
   level:
-    com.library: debug
+    com.chaos.library: debug

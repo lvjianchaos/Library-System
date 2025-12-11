@@ -80,7 +80,7 @@
         GROUP BY br.user_id
         ORDER BY borrowCount DESC
             LIMIT #{limit}
-    </select>
+</select>
 
     <!-- 热门图书：按 book_id 分组统计数量 -->
     <select id="findTopBooks" resultType="com.chaos.library.dto.TopBookDto">
