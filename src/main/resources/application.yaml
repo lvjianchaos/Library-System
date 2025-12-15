@@ -14,3 +14,19 @@ spring:
 logging:
   level:
     com.chaos.library: debug
+
+langchain4j:
+  open-ai:
+    chat-model:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: sk-c4ae6f45f6994651a1b6eb40e0b3ff00
+      model-name: qwen-plus
+    embedding-model:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: sk-c4ae6f45f6994651a1b6eb40e0b3ff00
+      model-name: text-embedding-v3
+      max-segments-per-batch: 10
+#  community:
+#    redis:
+#      host: localhost
+#      port: 6379
