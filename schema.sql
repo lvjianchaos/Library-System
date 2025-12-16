@@ -103,7 +103,17 @@ CREATE TABLE borrow (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='借阅表';
 
 -- 9.创建索引
-CREATE UNIQUE INDEX idx_book_isbn ON book(isbn);
+-- 场景：UserService.borrowBook 中校验是否重复借阅
+-- 覆盖查询条件：WHERE user_id=? AND book_id=? AND status=?
+CREATE INDEX idx_user_book_status ON borrow(user_id, book_id, status);
+
+-- 场景：StatisticsService.getTopBooks (热门图书统计)
+-- 优化 GROUP BY book_id
+CREATE INDEX idx_book_id ON borrow(book_id);
+
+-- 场景：用户查看自己的历史 (user_id 已经在上面的复合索引首位，这里可选，
+-- 但为了优化 ORDER BY created_at，可以建立 user_id + created_at)
+CREATE INDEX idx_user_history ON borrow(user_id, created_at);
 
 -- 10. 视图
 -- 【视图】创建一个“借阅单详情视图”，自动把书名拼好
