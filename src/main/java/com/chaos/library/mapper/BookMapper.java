@@ -156,4 +156,70 @@ public class BookMapper {
         } catch (SQLException e) { throw new RuntimeException(e); }
         return list;
     }
+
+    // ==========================================
+    // 新增实验功能代码：存储过程与触发器
+    // ==========================================
+
+    /**
+     * 【实验 3.1 存储过程】调用数据库存储过程借书
+     * 逻辑：Java 只负责发指令，具体的扣库存、判断触发器状态逻辑都在数据库 proc_borrow_and_get_status 中完成
+     *
+     * @param bookId 书籍ID
+     * @return 数据库返回的操作结果（例如："借阅成功..." 或 "借阅失败..."）
+     */
+    public String borrowBookWithProc(Long bookId) {
+        // {CALL ...} 是 JDBC 调用存储过程的标准语法
+        String sql = "{CALL proc_borrow_and_get_status(?, ?)}";
+        
+        try (Connection conn = dataSource.getConnection();
+             CallableStatement cs = conn.prepareCall(sql)) {
+            
+            // 1. 设置输入参数 (IN p_book_id)
+            cs.setLong(1, bookId);
+            
+            // 2. 注册输出参数类型 (OUT p_result_msg)
+            // 对应 SQL 中的 VARCHAR
+            cs.registerOutParameter(2, Types.VARCHAR);
+            
+            // 3. 执行存储过程
+            cs.execute();
+            
+            // 4. 获取输出参数的值
+            return cs.getString(2);
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("存储过程调用失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 【实验 3.2 触发器验证】查询图书监控状态
+     * 逻辑：这个状态不是 Java 写入的，而是当库存变化时，触发器 trg_auto_update_status 自动写入的
+     * 注意：请确保数据库中已创建表 book_status_monitor
+     */
+    public String checkBookMonitorStatus(Long bookId) {
+        String sql = "SELECT display_status FROM book_status_monitor WHERE book_id = ?";
+        
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, bookId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("display_status");
+                }
+            }
+        } catch (SQLException e) {
+            // 如果表不存在或查询失败
+            System.err.println("触发器监控表查询失败（可能是表未创建）: " + e.getMessage());
+        }
+        return "暂无状态记录";
+    }
+
+    
+
+
 }

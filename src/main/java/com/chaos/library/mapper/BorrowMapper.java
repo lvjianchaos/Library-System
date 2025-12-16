@@ -153,4 +153,50 @@ public class BorrowMapper {
         } catch (SQLException e) { throw new RuntimeException(e); }
         return list;
     }
+
+    // ==========================================
+    // 新增实验功能代码：视图实验
+    // ==========================================
+
+    /**
+     * 【实验 1.4 视图】从视图查询借阅详情
+     * 逻辑：直接查询 v_borrow_full_info 视图，代替原本复杂的 LEFT JOIN SQL。
+     * * @param userId 用户ID
+     * @return 借阅列表
+     */
+    public List<Borrow> findListFromView(Long userId) {
+        // 直接查视图，SQL 语句变得非常简洁
+        String sql = "SELECT borrow_id, user_id, book_title, book_isbn, borrow_time, return_time, status " +
+                     "FROM v_borrow_full_info WHERE user_id = ? ORDER BY borrow_time DESC";
+        
+        List<Borrow> list = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, userId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while(rs.next()) {
+                    Borrow b = new Borrow();
+                    // 注意：这里使用的是视图中定义的别名
+                    b.setId(rs.getLong("borrow_id"));
+                    b.setUserId(rs.getLong("user_id"));
+                    b.setBookTitle(rs.getString("book_title"));
+                    b.setBookIsbn(rs.getString("book_isbn"));
+                    
+                    Timestamp t1 = rs.getTimestamp("borrow_time");
+                    if(t1 != null) b.setBorrowTime(t1.toLocalDateTime());
+                    
+                    Timestamp t2 = rs.getTimestamp("return_time");
+                    if(t2 != null) b.setReturnTime(t2.toLocalDateTime());
+                    
+                    b.setStatus(rs.getInt("status"));
+                    list.add(b);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("视图查询失败: " + e.getMessage());
+        }
+        return list;
+    }
 }
