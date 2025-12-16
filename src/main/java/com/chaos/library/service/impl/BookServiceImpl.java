@@ -65,13 +65,12 @@ public class BookServiceImpl implements BookService {
         }
 
         // 2. 更新基本信息
+        int diff = request.getTotal() - existBook.getTotal();
         BeanUtils.copyProperties(request, existBook);
         // 注意：修改总数时，库存逻辑比较复杂。
         // 简单策略：库存变化量 = 新总数 - 旧总数
         // 新库存 = 旧库存 + (新总数 - 旧总数)
-        int diff = request.getTotal() - existBook.getTotal();
         existBook.setStock(existBook.getStock() + diff);
-
         if (existBook.getStock() < 0) {
             throw new ClientException("修改失败，减少的数量超过了当前库存量");
         }
@@ -113,7 +112,6 @@ public class BookServiceImpl implements BookService {
         BookDto dto = new BookDto();
         BeanUtils.copyProperties(book, dto);
         dto.setTags(tags);
-        // TODO: 查评论 (Phase 5)
 
         return dto;
     }
